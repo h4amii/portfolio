@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamid | Founder of LumoKits</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --black: #050505;
+            --black-light: #0a0a0a;
+            --black-card: #0f0f0f;
+            --purple: #a855f7;
+            --purple-glow: rgba(168,85,247,0.3);
+            --purple-soft: rgba(168,85,247,0.1);
+            --white: #f5f5f5;
+            --white-dim: #a0a0a0;
+            --silver: #c0c0c0;
+            --border: rgba(255,255,255,0.08);
+            --border-glow: rgba(168,85,247,0.2);
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:var(--black);color:var(--white);overflow-x:hidden}
+        ::selection{background:var(--purple-glow);color:var(--white)}
+
+        /* Loader */
+        .loader{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--black);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s ease,visibility 0.8s ease}
+        .loader.hidden{opacity:0;visibility:hidden}
+        .loader-text{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;font-weight:700;letter-spacing:0.2em;color:var(--white);margin-bottom:2rem}
+        .loader-text span{display:inline-block;opacity:0;animation:loaderReveal 0.5s ease forwards}
+        .loader-bar{width:200px;height:2px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;position:relative}
+        .loader-bar::after{content:'';position:absolute;left:0;top:0;height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--white));animation:loaderProgress 2s ease forwards}
+        @keyframes loaderReveal{to{opacity:1;transform:translateY(0)}from{opacity:0;transform:translateY(20px)}}
+        @keyframes loaderProgress{to{width:100%}}
+
+        /* Canvas */
+        #particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+        /* Navbar */
+        .navbar{position:fixed;top:20px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1200px;z-index:1000;padding:16px 32px;background:rgba(10,10,10,0.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:100px;display:flex;align-items:center;justify-content:space-between;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);opacity:0;transform:translateX(-50%) translateY(-20px)}
+        .navbar.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+        .navbar.scrolled{background:rgba(5,5,5,0.85);border-color:var(--border-glow);box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+        .nav-logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.2rem;color:var(--white);text-decoration:none;letter-spacing:0.05em}
+        .nav-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--purple),#7c3aed);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:white}
+        .nav-links{display:flex;gap:32px;list-style:none}
+        .nav-links a{color:var(--white-dim);text-decoration:none;font-size:0.85rem;font-weight:500;letter-spacing:0.05em;transition:color 0.3s ease;position:relative}
+        .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--purple);transition:width 0.3s ease}
+        .nav-links a:hover{color:var(--white)}
+        .nav-links a:hover::after{width:100%}
+        .nav-cta{padding:10px 24px;background:linear-gradient(135deg,var(--purple),#7c3aed);color:white;border:none;border-radius:100px;font-size:0.85rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.3s ease;position:relative;overflow:hidden}
+        .nav-cta::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.5s ease}
+        .nav-cta:hover::before{left:100%}
+        .nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--purple-glow)}
+        .mobile-menu-btn{display:none;background:none;border:none;color:var(--white);cursor:pointer}
+
+        /* Hero */
+        .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 40px 80px;position:relative;overflow:hidden}
+        .hero-glow{position:absolute;width:600px;height:600px;background:radial-gradient(circle,var(--purple-glow) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;animation:glowPulse 4s ease-in-out infinite}
+        @keyframes glowPulse{0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:0.8;transform:translate(-50%,-50%) scale(1.1)}}
+        .hero-container{max-width:1200px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+        .hero-content{position:relative;z-index:2}
+        .hero-label{font-family:'Space Grotesk',sans-serif;font-size:0.85rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--purple);margin-bottom:24px;display:flex;align-items:center;gap:12px;opacity:0}
+        .hero-label::before{content:'';width:40px;height:1px;background:var(--purple)}
+        .hero-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(3rem,8vw,6rem);font-weight:700;line-height:1.05;margin-bottom:16px;letter-spacing:-0.02em}
+        .hero-title .char{display:inline-block;opacity:0;transform:translateY(100px)}
+        .hero-subtitle{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.2rem,3vw,1.8rem);font-weight:400;color:var(--silver);margin-bottom:24px;opacity:0}
+        .hero-desc{font-size:1.05rem;line-height:1.7;color:var(--white-dim);max-width:480px;margin-bottom:40px;opacity:0}
+        .hero-buttons{display:flex;gap:16px;flex-wrap:wrap;opacity:0}
+
+        .btn-primary{padding:16px 36px;background:linear-gradient(135deg,var(--purple),#7c3aed);color:white;border:none;border-radius:100px;font-size:0.95rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);position:relative;overflow:hidden}
+        .btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.6s ease}
+        .btn-primary:hover::before{left:100%}
+        .btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px var(--purple-glow)}
+
+        .btn-secondary{padding:16px 36px;background:transparent;color:var(--white);border:1px solid var(--border);border-radius:100px;font-size:0.95rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);position:relative;overflow:hidden}
+        .btn-secondary::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,var(--purple-soft),transparent);opacity:0;transition:opacity 0.4s ease}
+        .btn-secondary:hover::before{opacity:1}
+        .btn-secondary:hover{border-color:var(--border-glow);transform:translateY(-3px);box-shadow:0 8px 32px rgba(168,85,247,0.15)}
+
+        .hero-image-container{position:relative;display:flex;justify-content:center;align-items:center;opacity:0}
+        .hero-image-wrapper{position:relative;width:400px;height:400px;transition:transform 0.3s ease}
+        .hero-image{width:100%;height:100%;object-fit:cover;border-radius:24px;position:relative;z-index:2;filter:contrast(1.05) brightness(1.02)}
+        .hero-image-glow{position:absolute;inset:-20px;background:radial-gradient(circle at center,var(--purple-glow) 0%,transparent 70%);border-radius:40px;z-index:1;animation:imageGlow 3s ease-in-out infinite}
+        @keyframes imageGlow{0%,100%{opacity:0.6}50%{opacity:1}}
+        .hero-image-ring{position:absolute;inset:-40px;border:1px solid var(--border-glow);border-radius:50%;z-index:0;animation:ringRotate 20s linear infinite}
+        .hero-image-ring-2{position:absolute;inset:-60px;border:1px solid rgba(168,85,247,0.1);border-radius:50%;z-index:0;animation:ringRotate 30s linear infinite reverse}
+        @keyframes ringRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+        .hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0}
+        .hero-scroll-text{font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim)}
+        .hero-scroll-line{width:1px;height:60px;background:linear-gradient(to bottom,var(--purple),transparent);animation:scrollLine 2s ease-in-out infinite}
+        @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}50.1%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+        /* Sections */
+        .section{padding:120px 40px;position:relative}
+        .section-container{max-width:1200px;margin:0 auto}
+        .section-header{margin-bottom:64px}
+        .section-label{font-family:'Space Grotesk',sans-serif;font-size:0.8rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--purple);margin-bottom:16px;display:flex;align-items:center;gap:12px}
+        .section-label::before{content:'';width:32px;height:1px;background:var(--purple)}
+        .section-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;line-height:1.1;letter-spacing:-0.02em}
+
+        /* About */
+        .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+        .about-card{background:var(--black-card);border:1px solid var(--border);border-radius:24px;padding:48px;position:relative;overflow:hidden;transition:all 0.4s cubic-bezier(0.16,1,0.3,1)}
+        .about-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:0;transition:opacity 0.4s ease}
+        .about-card:hover::before{opacity:1}
+        .about-card:hover{border-color:var(--border-glow);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 40px var(--purple-soft)}
+        .about-card-glass{position:absolute;inset:0;background:linear-gradient(135deg,rgba(168,85,247,0.03),transparent);pointer-events:none}
+        .about-text{font-size:1.1rem;line-height:1.8;color:var(--white-dim);position:relative;z-index:1}
+        .about-text strong{color:var(--white);font-weight:600}
+        .about-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+        .stat-item{background:var(--black-card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;transition:all 0.4s ease}
+        .stat-item:hover{border-color:var(--border-glow);transform:translateY(-4px)}
+        .stat-number{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:var(--purple);margin-bottom:8px}
+        .stat-label{font-size:0.85rem;color:var(--white-dim);letter-spacing:0.05em}
+
+        /* Journey */
+        .journey-timeline{position:relative;padding-left:40px}
+        .journey-timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--purple),transparent)}
+        .timeline-item{position:relative;padding-bottom:48px;padding-left:40px;opacity:0;transform:translateX(-30px)}
+        .timeline-item:last-child{padding-bottom:0}
+        .timeline-dot{position:absolute;left:-45px;top:4px;width:12px;height:12px;background:var(--purple);border-radius:50%;box-shadow:0 0 20px var(--purple-glow)}
+        .timeline-dot::after{content:'';position:absolute;inset:-6px;border:1px solid var(--purple);border-radius:50%;animation:dotPulse 2s ease-in-out infinite}
+        @keyframes dotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0}}
+        .timeline-content{background:var(--black-card);border:1px solid var(--border);border-radius:20px;padding:32px;transition:all 0.4s ease}
+        .timeline-content:hover{border-color:var(--border-glow);transform:translateX(8px)}
+        .timeline-title{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:600;margin-bottom:12px;color:var(--white)}
+        .timeline-desc{font-size:0.95rem;line-height:1.6;color:var(--white-dim)}
+
+        /* LumoKits */
+        .lumokits-showcase{background:var(--black-light);border:1px solid var(--border);border-radius:32px;overflow:hidden;position:relative}
+        .lumokits-showcase::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+        .lumokits-header{padding:48px 48px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px}
+        .lumokits-brand{display:flex;align-items:center;gap:16px}
+        .lumokits-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--purple),#7c3aed);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.2rem;color:white}
+        .lumokits-info h3{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:4px}
+        .lumokits-info p{font-size:0.9rem;color:var(--white-dim)}
+        .lumokits-preview{padding:48px;position:relative}
+        .lumokits-browser{background:var(--black);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+        .browser-header{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--black-card);border-bottom:1px solid var(--border)}
+        .browser-dot{width:10px;height:10px;border-radius:50%}
+        .browser-dot.red{background:#ff5f57}
+        .browser-dot.yellow{background:#febc2e}
+        .browser-dot.green{background:#28c840}
+        .browser-url{flex:1;background:var(--black);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-size:0.8rem;color:var(--white-dim);text-align:center}
+        .browser-content{padding:40px;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px}
+        .browser-content h4{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700}
+        .browser-content p{color:var(--white-dim);max-width:500px;line-height:1.6}
+
+        /* Contact */
+        .contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+        .contact-card{background:var(--black-card);border:1px solid var(--border);border-radius:20px;padding:32px;display:flex;align-items:flex-start;gap:20px;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);cursor:pointer;position:relative;overflow:hidden}
+        .contact-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--purple-soft),transparent);opacity:0;transition:opacity 0.4s ease}
+        .contact-card:hover::before{opacity:1}
+        .contact-card:hover{border-color:var(--border-glow);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,0.3),0 0 30px var(--purple-soft)}
+        .contact-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--purple-soft),transparent);border:1px solid var(--border-glow);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--purple);flex-shrink:0;position:relative;z-index:1}
+        .contact-info{position:relative;z-index:1}
+        .contact-label{font-size:0.8rem;color:var(--white-dim);margin-bottom:6px;letter-spacing:0.05em;text-transform:uppercase}
+        .contact-value{font-size:1rem;font-weight:500;color:var(--white);word-break:break-all}
+        .contact-copy{position:absolute;top:16px;right:16px;opacity:0;transition:opacity 0.3s ease;color:var(--purple);font-size:0.8rem;z-index:2}
+        .contact-card:hover .contact-copy{opacity:1}
+        .contact-toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--black-card);border:1px solid var(--border-glow);border-radius:12px;padding:16px 32px;display:flex;align-items:center;gap:12px;z-index:9998;transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+        .contact-toast.show{transform:translateX(-50%) translateY(0)}
+
+        /* Footer */
+        .footer{padding:80px 40px 40px;border-top:1px solid var(--border);position:relative}
+        .footer::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+        .footer-container{max-width:1200px;margin:0 auto}
+        .footer-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:48px;flex-wrap:wrap;gap:24px}
+        .footer-brand{display:flex;align-items:center;gap:12px}
+        .footer-logo{width:44px;height:44px;background:linear-gradient(135deg,var(--purple),#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:white;font-size:1rem}
+        .footer-brand-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem}
+        .footer-quote{font-size:1.1rem;color:var(--white-dim);font-style:italic;max-width:400px;text-align:right}
+        .footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);flex-wrap:wrap;gap:16px}
+        .footer-links{display:flex;gap:24px}
+        .footer-links a{color:var(--white-dim);text-decoration:none;font-size:0.9rem;transition:color 0.3s ease}
+        .footer-links a:hover{color:var(--purple)}
+        .footer-social{display:flex;gap:16px}
+        .footer-social a{width:40px;height:40px;border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--white-dim);text-decoration:none;transition:all 0.3s ease}
+        .footer-social a:hover{border-color:var(--border-glow);color:var(--purple);transform:translateY(-2px)}
+        .footer-copyright{font-size:0.85rem;color:var(--white-dim)}
+
+        /* Mobile Menu */
+        .mobile-menu{position:fixed;top:0;right:-100%;width:100%;max-width:400px;height:100vh;background:var(--black);border-left:1px solid var(--border);z-index:1001;padding:100px 40px 40px;transition:right 0.4s cubic-bezier(0.16,1,0.3,1)}
+        .mobile-menu.open{right:0}
+        .mobile-menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;opacity:0;visibility:hidden;transition:all 0.4s ease}
+        .mobile-menu-overlay.open{opacity:1;visibility:visible}
+        .mobile-menu-links{list-style:none;display:flex;flex-direction:column;gap:24px}
+        .mobile-menu-links a{color:var(--white);text-decoration:none;font-size:1.5rem;font-weight:600;transition:color 0.3s ease}
+        .mobile-menu-links a:hover{color:var(--purple)}
+        .mobile-menu-close{position:absolute;top:24px;right:24px;background:none;border:none;color:var(--white);cursor:pointer}
+
+        /* Responsive */
+        @media(max-width:1024px){
+            .hero-container{grid-template-columns:1fr;text-align:center}
+            .hero-content{order:2}
+            .hero-image-container{order:1}
+            .hero-image-wrapper{width:300px;height:300px}
+            .hero-desc{margin-left:auto;margin-right:auto}
+            .hero-buttons{justify-content:center}
+            .about-grid{grid-template-columns:1fr}
+            .nav-links,.nav-cta{display:none}
+            .mobile-menu-btn{display:block}
+        }
+        @media(max-width:768px){
+            .section{padding:80px 24px}
+            .hero{padding:100px 24px 60px}
+            .about-card{padding:32px}
+            .timeline-content{padding:24px}
+            .lumokits-header,.lumokits-preview{padding:32px}
+            .footer{padding:60px 24px 24px}
+            .footer-top,.footer-bottom{flex-direction:column;text-align:center}
+            .footer-quote{text-align:center}
+        }
+
+        .reveal{opacity:0;transform:translateY(40px)}
+        .reveal-left{opacity:0;transform:translateX(-40px)}
+        .reveal-right{opacity:0;transform:translateX(40px)}
+        .reveal-scale{opacity:0;transform:scale(0.9)}
+
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:var(--black)}
+        ::-webkit-scrollbar-thumb{background:var(--border-glow);border-radius:3px}
+        ::-webkit-scrollbar-thumb:hover{background:var(--purple)}
+
+        #contact {
+    position: relative;
+    z-index: 10;
+}
+
+   .mouse-follower{
+    position: fixed;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(168,85,247,0.8);
+    pointer-events: none;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+}
+
+/* hide on touch devices */
+@media (hover: none) {
+    .mouse-follower{
+        display:none;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-text">
+            <span style="animation-delay:0s">H</span>
+            <span style="animation-delay:0.1s">A</span>
+            <span style="animation-delay:0.2s">M</span>
+            <span style="animation-delay:0.3s">I</span>
+            <span style="animation-delay:0.4s">D</span>
+        </div>
+        <div class="loader-bar"></div>
+    </div>
+
+    <!-- Particle Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="nav-logo">
+            <img src="lumokalogo.png" alt="LumoKits" style="width:36px;height:36px;object-fit:contain;">
+            <span>@lumokits</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#journey">Journey</a></li>
+            <li><a href="#lumokits">lumokits</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="https://lumokits.online" target="_blank" class="nav-cta">Visit lumokits</a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="mobileMenuClose">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+        <ul class="mobile-menu-links">
+            <li><a href="#home" class="mobile-link">Home</a></li>
+            <li><a href="#about" class="mobile-link">About</a></li>
+            <li><a href="#journey" class="mobile-link">Journey</a></li>
+            <li><a href="#lumokits" class="mobile-link">lumokits</a></li>
+            <li><a href="#contact" class="mobile-link">Contact</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero-glow"></div>
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div class="hero-label">Founder & Builder</div>
+                    <h1 class="hero-title" id="heroTitle">HAMID</h1>
+                    <p class="hero-subtitle">Founder of lumokits</p>
+                    <p class="hero-desc">Building and growing a modern apparel-focused brand from Pakistan through creativity, learning, and ambition.</p>
+                    <div class="hero-buttons">
+                        <a href="#about" class="btn-primary">
+                            Explore Portfolio
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                        </a>
+                        <a href="https://lumokits.online" target="_blank" class="btn-secondary">
+                            Visit lumokits Website
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-image-container" id="heroImage">
+                    <div class="hero-image-wrapper" id="heroImageWrapper">
+                        <div class="hero-image-ring"></div>
+                        <div class="hero-image-ring-2"></div>
+                        <div class="hero-image-glow"></div>
+                        <img src="670505954_17881255257551064_4814853981637887457_n.jpg" alt="Hamid - Founder of LumoKits" class="hero-image" id="heroImg">
+                    </div>
+                </div>
+            </div>
+            <div class="hero-scroll">
+                <span class="hero-scroll-text">Scroll to explore</span>
+                <div class="hero-scroll-line"></div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section" id="about">
+            <div class="section-container">
+                <div class="section-header reveal">
+                    <div class="section-label">About</div>
+                    <h2 class="section-title">The Story Behind<br>the Builder</h2>
+                </div>
+                <div class="about-grid">
+                    <div class="about-card reveal-left">
+                        <div class="about-card-glass"></div>
+                        <p class="about-text">I'm <strong>Hamid</strong>, a young founder from <strong>Pakistan</strong> building <strong>lumokits</strong> — an apparel and manufacturing-focused brand. My focus is on <strong>learning</strong>, improving systems, branding, and growing step by step through real experience. Every day is a new opportunity to build something meaningful and learn from the process.</p>
+                    </div>
+                    <div class="about-stats reveal-right">
+                        <div class="stat-item">
+                            <div class="stat-number">15</div>
+                            <div class="stat-label">Years Old</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">PK</div>
+                            <div class="stat-label">Based in Pakistan</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">0</div>
+                            <div class="stat-label">Co-founders</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">∞</div>
+                            <div class="stat-label">Ambition</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Journey Section -->
+        <section class="section" id="journey">
+            <div class="section-container">
+                <div class="section-header reveal">
+                    <div class="section-label">Journey</div>
+                    <h2 class="section-title">Building Step<br>by Step</h2>
+                </div>
+                <div class="journey-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">Interest in Business</h3>
+                            <p class="timeline-desc">Developed a passion for entrepreneurship and business building at a young age, constantly exploring how brands are created and scaled.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">Starting lumokits</h3>
+                            <p class="timeline-desc">Founded lumokits with a vision to create a modern apparel brand focused on quality manufacturing and creative design from Pakistan.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">Learning Branding</h3>
+                            <p class="timeline-desc">Diving deep into brand identity, visual design, and storytelling to build a brand that resonates with people and stands out.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">Exploring Manufacturing</h3>
+                            <p class="timeline-desc">Understanding the apparel manufacturing process, supply chains, and production quality to deliver real value to customers.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">Building Online Systems</h3>
+                            <p class="timeline-desc">Creating digital presence, e-commerce systems, and online marketing strategies to reach a wider audience and grow the brand.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">Growing Step by Step</h3>
+                            <p class="timeline-desc">Continuing to learn, adapt, and improve every aspect of the business while staying authentic to the original vision.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LumoKits Section -->
+        <section class="section" id="lumokits">
+            <div class="section-container">
+                <div class="section-header reveal">
+                    <div class="section-label">Brand</div>
+                    <h2 class="section-title">lumokits<br>Showcase</h2>
+                </div>
+                <div class="lumokits-showcase reveal-scale">
+                    <div class="lumokits-header">
+                        <div class="lumokits-brand">
+                             <img src="lumokalogo.png" alt="LumoKits" style="width:36px;height:36px;object-fit:contain;">
+                            <div class="lumokits-info">
+                                <h3>lumokits</h3>
+                                <p>Apparel & Manufacturing Brand</p>
+                            </div>
+                        </div>
+                        <a href="https://lumokits.online" target="_blank" class="btn-primary">
+                            Visit lumokits
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                        </a>
+                    </div>
+                    <div class="lumokits-preview">
+                        <div class="lumokits-browser">
+                            <div class="browser-header">
+                                <div class="browser-dot red"></div>
+                                <div class="browser-dot yellow"></div>
+                                <div class="browser-dot green"></div>
+                                <div class="browser-url">lumokits.online</div>
+                            </div>
+                            <div class="browser-content">
+                                <img src="lumokalogo.png" alt="LumoKits" style="width:36px;height:36px;object-fit:contain;">
+                                <h4>lumokits</h4>
+                                <p>A modern apparel and manufacturing-focused brand built with creativity and ambition from Pakistan. Explore our collection and vision.</p>
+                                <a href="https://lumokits.online" target="_blank" class="btn-primary" style="margin-top:8px">
+                                    Explore Now
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="section" id="contact">
+            <div class="section-container">
+                <div class="section-header reveal">
+                    <div class="section-label">Connect</div>
+                    <h2 class="section-title">Get in<br>Touch</h2>
+                </div>
+                <div class="contact-grid">
+                    <div class="contact-card" data-copy="@h4amii">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Instagram</div>
+                            <div class="contact-value">@h4amii</div>
+                        </div>
+                        <div class="contact-copy">Click to copy</div>
+                    </div>
+                    <div class="contact-card" data-copy="+92 328 475 0234">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Whatsapp</div>
+                            <div class="contact-value">+92 328 475 0234</div>
+                        </div>
+                        <div class="contact-copy">Click to copy</div>
+                    </div>
+                    <div class="contact-card" data-copy="walatibalak@gmail.com">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Email</div>
+                            <div class="contact-value">walatibalak@gmail.com</div>
+                        </div>
+                        <div class="contact-copy">Click to copy</div>
+                    </div>
+                    <div class="contact-card" data-copy="https://lumokits.online">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Website</div>
+                            <div class="contact-value">lumokits.online</div>
+                        </div>
+                        <div class="contact-copy">Click to copy</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast -->
+    <div class="contact-toast" id="toast">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        <span id="toastText">Copied to clipboard!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                     <img src="lumokalogo.png" alt="LumoKits" style="width:36px;height:36px;object-fit:contain;">
+                    <span class="footer-brand-text">lumokits</span>
+                </div>
+                <p class="footer-quote">"Built with ambition, creativity, and vision."</p>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#journey">Journey</a>
+                    <a href="#lumokits">lumokits</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <div class="footer-social">
+                    <a href="https://instagram.com/h4amii" target="_blank" aria-label="Instagram">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                    </a>
+                    <a href="https://lumokits.online" target="_blank" aria-label="Website">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    </a>
+                     <a href="https://wa.me/923284750234" target="_blank" aria-label="Whatsapp">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M20.52 3.48A11.86 11.86 0 0 0 12.07 0C5.5 0 .17 5.33.17 11.9c0 2.1.55 4.15 1.6 5.95L0 24l6.35-1.67a11.9 11.9 0 0 0 5.72 1.46h.01c6.57 0 11.9-5.33 11.9-11.9 0-3.18-1.24-6.17-3.46-8.41zM12.08 21.8a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.77.99 1.01-3.68-.23-.38a9.88 9.88 0 0 1-1.51-5.25c0-5.46 4.44-9.9 9.9-9.9 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.9 6.99c0 5.46-4.44 9.91-9.89 9.91zm5.43-7.43c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.08-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.67-2.07-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.5h-.57c-.2 0-.52.08-.8.37-.27.3-1.04 1.02-1.04 2.5s1.07 2.9 1.22 3.1c.15.2 2.1 3.2 5.08 4.48.71.31 1.27.5 1.7.64.71.22 1.35.19 1.86.11.57-.08 1.77-.72 2.02-1.42.25-.69.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+        <div class="mouse-follower"></div>
+    <script>
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('navbar').classList.add('visible');
+        initHeroAnimations();
+
+        // ✅ FIX: force GSAP to recalculate layout
+        setTimeout(() => {
+            if (window.ScrollTrigger) {
+                ScrollTrigger.refresh(true);
+            }
+        }, 500);
+
+    }, 2200);
+});
+
+        // Hero Animations
+        function initHeroAnimations() {
+            const title = document.getElementById('heroTitle');
+            const text = title.textContent;
+            title.innerHTML = '';
+
+            text.split('').forEach((char, i) => {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = char;
+                span.style.animationDelay = `${i * 0.1}s`;
+                title.appendChild(span);
+            });
+
+            gsap.to('.char', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: 'power3.out',
+                delay: 0.3
+            });
+
+            gsap.to('.hero-label', {
+                opacity: 1,
+                duration: 0.8,
+                delay: 0.1,
+                ease: 'power3.out'
+            });
+
+            gsap.to('.hero-subtitle', {
+                opacity: 1,
+                duration: 0.8,
+                delay: 0.8,
+                ease: 'power3.out'
+            });
+
+            gsap.to('.hero-desc', {
+                opacity: 1,
+                duration: 0.8,
+                delay: 1,
+                ease: 'power3.out'
+            });
+
+            gsap.to('.hero-buttons', {
+                opacity: 1,
+                duration: 0.8,
+                delay: 1.2,
+                ease: 'power3.out'
+            });
+
+            gsap.to('#heroImage', {
+                opacity: 1,
+                duration: 1.2,
+                delay: 0.5,
+                ease: 'power3.out'
+            });
+
+            gsap.to('.hero-scroll', {
+                opacity: 1,
+                duration: 0.8,
+                delay: 1.8,
+                ease: 'power3.out'
+            });
+        }
+
+        // Particle System
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouseX = 0, mouseY = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    const force = (150 - dist) / 150;
+                    this.x -= dx * force * 0.02;
+                    this.y -= dy * force * 0.02;
+                }
+
+                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(168, 85, 247, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 80; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(168, 85, 247, ${0.1 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Scroll Animations with GSAP
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Navbar scroll effect
+        ScrollTrigger.create({
+            start: 'top -100',
+            onUpdate: (self) => {
+                if (self.direction === 1 && self.progress > 0) {
+                    document.getElementById('navbar').classList.add('scrolled');
+                } else if (self.progress === 0) {
+                    document.getElementById('navbar').classList.remove('scrolled');
+                }
+            }
+        });
+
+        // Reveal animations
+        gsap.utils.toArray('.reveal').forEach(el => {
+            gsap.to(el, {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        gsap.utils.toArray('.reveal-left').forEach(el => {
+            gsap.to(el, {
+                opacity: 1,
+                x: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        gsap.utils.toArray('.reveal-right').forEach(el => {
+            gsap.to(el, {
+                opacity: 1,
+                x: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        gsap.utils.toArray('.reveal-scale').forEach(el => {
+            gsap.to(el, {
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        // Timeline items
+        gsap.utils.toArray('.timeline-item').forEach((el, i) => {
+            gsap.to(el, {
+                opacity: 1,
+                x: 0,
+                duration: 0.6,
+                delay: i * 0.1,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        // Contact cards stagger
+        gsap.fromTo('.contact-card',
+  { opacity: 0, y: 40 },
+  {
+    opacity: 1,
+    y: 0,
+    duration: 0.6,
+    stagger: 0.1,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: '.contact-grid',
+      start: 'top 90%',
+      toggleActions: 'play none none none',
+      once: true
+    }
+  }
+);
+
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('open');
+            mobileMenuOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('open');
+            mobileMenuOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+        mobileMenuClose.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        mobileLinks.forEach(link => link.addEventListener('click', closeMobileMenu));
+
+        // Copy to Clipboard
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        let toastTimeout;
+
+        document.querySelectorAll('.contact-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const text = card.getAttribute('data-copy');
+                navigator.clipboard.writeText(text).then(() => {
+                    toastText.textContent = `Copied: ${text}`;
+                    toast.classList.add('show');
+                    clearTimeout(toastTimeout);
+                    toastTimeout = setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 3000);
+                });
+            });
+        });
+
+        // Smooth Scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Parallax effect for hero image
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroImg = document.getElementById('heroImage');
+            if (heroImg && scrolled < window.innerHeight) {
+                heroImg.style.transform = `translateY(${scrolled * 0.3}px)`;
+            }
+        });
+
+        // 3D Tilt Effect for Hero Image
+        const heroImageWrapper = document.getElementById('heroImageWrapper');
+        if (heroImageWrapper) {
+            document.addEventListener('mousemove', (e) => {
+                const rect = heroImageWrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+
+                if (Math.abs(x) < rect.width && Math.abs(y) < rect.height) {
+                    const rotateX = (y / rect.height) * -10;
+                    const rotateY = (x / rect.width) * 10;
+                    heroImageWrapper.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                }
+            });
+
+            document.addEventListener('mouseleave', () => {
+                heroImageWrapper.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            });
+        }
+
+        // Magnetic Button Effect
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0, 0)';
+            });
+        });
+
+        // Hero image subtle floating animation
+        gsap.to('.hero-image-wrapper', {
+            y: -10,
+            duration: 3,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1
+        });
+const follower = document.querySelector('.mouse-follower');
+
+let followerMouseX = 0;
+let followerMouseY = 0;
+let currentX = 0;
+let currentY = 0;
+
+document.addEventListener('mousemove', (e) => {
+    followerMouseX = e.clientX;
+    followerMouseY = e.clientY;
+});
+
+function animateFollower() {
+    currentX += (followerMouseX - currentX) * 0.06;
+    currentY += (followerMouseY - currentY) * 0.06;
+
+    follower.style.left = currentX + 'px';
+    follower.style.top = currentY + 'px';
+
+    requestAnimationFrame(animateFollower);
+}
+
+animateFollower();
+    </script>
+</body>
+</html>
